@@ -5,6 +5,7 @@ Sample AWS Lambda application with GraalVM and AWS CRT client writing to Amazon 
 ## Load test results
 
 0.. warm start
+
 1.. cold start (init duration + duration)
 
 ## Prerequisites
@@ -25,7 +26,7 @@ docker build -t al2-graalvm:maven .
 2. Build the application via the bundling image:
 
 ```bash
-sam build --build-image al2-graalvm:maven --use-container && sam deploy
+sam build --build-image al2-graalvm:maven --use-container
 ```
 
 3. Deploy the application
@@ -34,7 +35,7 @@ sam build --build-image al2-graalvm:maven --use-container && sam deploy
 sam deploy ## --guided for the first run
 ```
 
-3. Test the application
+## Test the application
 
 Get the API-Gateway Url:
 
