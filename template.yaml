@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  request-header-api
+
+  This API stores request headers to Amazon DynamoDB (wow)
+
+Globals:
+  Function:
+    Timeout: 20
+
+Resources:
+  RequestHeaderWriterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: dynamodb-request-writer-graal
+      CodeUri: request-writer
+      Runtime: provided.al2
+      MemorySize: 1024
+      Handler: com.maschnetwork.RequestHeaderWriter
+      Events:
+        RequestHeaderEvent:
+          Type: Api
+          Properties:
+            Path: /request-headers-graal
+            Method: post
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref RequestHeaderTable
+    Metadata:
+      BuildMethod: makefile
+  RequestHeaderTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: request-headers
+
+Outputs:
+  RequestHeaderGraalApi:
+    Description: "API Gateway endpoint URL for Prod stage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  RequestHeaderWriterFunction:
+    Description: "Lambda Function ARN"
+    Value: !GetAtt RequestHeaderWriterFunction.Arn
+  RequestHeaderWriterFunctionIamRole:
+    Description: "Implicit IAM Role created for the function"
+    Value: !GetAtt RequestHeaderWriterFunction.Arn
+
