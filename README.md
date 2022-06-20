@@ -1,4 +1,4 @@
-# AWS Lambda Java GraalVM function with AWS CRT client
+# AWS Lambda Java GraalVM with AWS CRT client
 
 Sample AWS Lambda application with GraalVM and AWS CRT client writing to Amazon DynamoDB.
 
