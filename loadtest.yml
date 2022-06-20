@@ -1,7 +1,7 @@
 config:
   phases:
-    - duration: 60
-      arrivalRate: 120
+    - duration: 30
+      arrivalRate: 150
 scenarios:
   - flow:
       - post:

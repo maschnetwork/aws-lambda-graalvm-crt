@@ -4,6 +4,8 @@ Sample AWS Lambda application with GraalVM and AWS CRT client writing to Amazon 
 
 ## Load test results
 
+![Loadtest Result](result.png)
+
 0.. warm start
 
 1.. cold start (init duration + duration)
