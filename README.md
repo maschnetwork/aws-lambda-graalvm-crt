@@ -55,7 +55,7 @@ curl -XPOST "$API_GW_URL/request-headers-graal" --header 'Content-Type: applicat
 Run the test via:
 
 ```bash
-artillery run -t $API_GW_URL  -v '{ "url": "/request-headers-graal" }' loadtest.yaml
+artillery run -t $API_GW_URL  -v '{ "url": "/request-headers-graal" }' loadtest.yml
 ```
 
 Retrieve results in Cloudwatch-Log insights via:
