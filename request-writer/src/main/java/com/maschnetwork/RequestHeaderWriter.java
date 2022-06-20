@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class RequestHeaderWriter implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -45,9 +46,9 @@ public class RequestHeaderWriter implements RequestHandler<APIGatewayProxyReques
             dynamoDbClient.putItem(PutItemRequest.builder()
                     .tableName("request-headers")
                     .item(itemAttributes)
-                    .build());
+                    .build()).get();
             return response.withBody("successful").withStatusCode(200);
-        } catch (DynamoDbException e) {
+        } catch (DynamoDbException | InterruptedException | ExecutionException e) {
             logger.error("Error while executing request", e);
             return response.withBody("error").withStatusCode(500);
         }
