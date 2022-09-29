@@ -8,7 +8,7 @@
     <name>A sample Lambda function putting items to Amazon DynamoDB.</name>
 
     <properties>
-        <aws.java.sdk.version>2.17.214</aws.java.sdk.version>
+        <aws.java.sdk.version>2.17.282</aws.java.sdk.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
