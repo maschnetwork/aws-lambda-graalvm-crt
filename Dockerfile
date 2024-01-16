@@ -37,7 +37,4 @@ RUN ln -s /usr/lib/maven/bin/mvn /usr/bin/mvn
 
 ENV JAVA_HOME /usr/lib/graalvm
 
-COPY aws-crt-1.0.0-SNAPSHOT.jar .
-RUN mvn install:install-file -Dfile=aws-crt-1.0.0-SNAPSHOT.jar -DgroupId=software.amazon.awssdk.crt -DartifactId=aws-crt -Dversion=1.0.0-SNAPSHOT -Dpackaging=jar -DgeneratePom=true
-
 ENTRYPOINT ["sh"]

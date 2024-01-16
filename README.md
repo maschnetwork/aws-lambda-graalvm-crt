@@ -22,13 +22,13 @@ Sample AWS Lambda application with GraalVM and AWS CRT client writing to Amazon 
 1. Create the bundling image:
 
 ```bash
-docker build -t al2-graalvm:maven .
+docker build -t al2023-graalvm:maven .
 ```
 
 2. Build the application via the bundling image:
 
 ```bash
-sam build --build-image al2-graalvm:maven --use-container
+sam build --build-image al2023-graalvm:maven --use-container
 ```
 
 3. Deploy the application
