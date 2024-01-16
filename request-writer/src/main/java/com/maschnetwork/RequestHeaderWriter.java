@@ -9,8 +9,10 @@ import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.core.SdkSystemSetting;
 import software.amazon.awssdk.http.crt.AwsCrtAsyncHttpClient;
+import software.amazon.awssdk.http.crt.AwsCrtHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.PutItemRequest;
@@ -29,7 +31,14 @@ public class RequestHeaderWriter implements RequestHandler<APIGatewayProxyReques
             .httpClientBuilder(AwsCrtAsyncHttpClient.builder())
             .build();
 
+    private final DynamoDbClient dynamoDbSyncClient = DynamoDbClient.builder()
+            .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+            .region(Region.of(System.getenv(SdkSystemSetting.AWS_REGION.environmentVariable())))
+            .httpClientBuilder(AwsCrtHttpClient.builder())
+            .build();
+
     public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent input, final Context context) {
+
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
         try {
             Map<String, AttributeValue> itemAttributes = new HashMap<>();
@@ -47,6 +56,22 @@ public class RequestHeaderWriter implements RequestHandler<APIGatewayProxyReques
                     .tableName("request-headers")
                     .item(itemAttributes)
                     .build()).get();
+
+            Map<String, AttributeValue> itemAttributesSync = new HashMap<>();
+            itemAttributesSync.put("id", AttributeValue.builder().s("sync-" + context.getAwsRequestId()).build());
+            itemAttributesSync.put("value",
+                    AttributeValue.builder().s(
+                            input.getHeaders().entrySet()
+                                    .stream()
+                                    .map(a -> a.getKey()+"="+a.getValue())
+                                    .collect(Collectors.joining())
+                    ).build()
+            );
+
+            dynamoDbSyncClient.putItem(PutItemRequest.builder()
+                    .tableName("request-headers")
+                    .item(itemAttributesSync)
+                    .build());
             return response.withBody("successful").withStatusCode(200);
         } catch (DynamoDbException | InterruptedException | ExecutionException e) {
             logger.error("Error while executing request", e);
