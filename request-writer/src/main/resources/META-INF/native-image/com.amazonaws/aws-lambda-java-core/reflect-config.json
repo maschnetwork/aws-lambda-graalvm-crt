@@ -9,5 +9,15 @@
     "name":"com.amazonaws.services.lambda.runtime.LambdaRuntimeInternal",
     "methods":[{"name":"<init>","parameterTypes":[] }],
     "allPublicMethods":true
+  },
+  {
+    "name":"com.amazonaws.services.lambda.runtime.logging.LogLevel",
+    "allDeclaredConstructors" : true,
+    "allPublicConstructors" : true,
+    "allDeclaredFields": true,
+    "allDeclaredMethods" : true,
+    "allPublicMethods" : true,
+    "allDeclaredClasses" : true,
+    "allPublicClasses" : true
   }
 ]

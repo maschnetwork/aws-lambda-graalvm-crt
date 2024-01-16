@@ -2,16 +2,7 @@
   "resources": {
     "includes": [
       {
-        "pattern": "\\Qaarch64/aws-lambda-runtime-interface-client.glibc.so\\E"
-      },
-      {
-        "pattern": "\\Qaarch64/aws-lambda-runtime-interface-client.musl.so\\E"
-      },
-      {
-        "pattern": "\\Qx86_64/aws-lambda-runtime-interface-client.glibc.so\\E"
-      },
-      {
-        "pattern": "\\Qx86_64/aws-lambda-runtime-interface-client.musl.so\\E"
+        "pattern": ".*libaws-lambda-jni.*.so"
       }
     ]
   },

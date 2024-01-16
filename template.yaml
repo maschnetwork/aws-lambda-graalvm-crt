@@ -15,7 +15,7 @@ Resources:
     Properties:
       FunctionName: dynamodb-request-writer-graal
       CodeUri: request-writer
-      Runtime: provided.al2
+      Runtime: provided.al2023
       MemorySize: 1024
       Handler: com.maschnetwork.RequestHeaderWriter
       Events:
