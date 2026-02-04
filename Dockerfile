@@ -6,16 +6,16 @@ RUN yum -y update \
     zlib-devel glibc-static zlib-static \
     && rm -rf /var/cache/yum
 
-# Graal VM
-ENV GRAAL_VERSION 17.0.9
+# GraalVM JDK 25 (native-image is now bundled, no need for gu install)
+ENV GRAAL_VERSION 25.0.1
 ENV GRAAL_FOLDERNAME graalvm-community-jdk-${GRAAL_VERSION}
-ENV GRAAL_FILENAME ${GRAAL_FOLDERNAME}_linux-x64_bin.tar.gz
+ENV GRAAL_FILENAME graalvm-community-jdk-${GRAAL_VERSION}_linux-x64_bin.tar.gz
 RUN curl -4 -L https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-${GRAAL_VERSION}/${GRAAL_FILENAME} | tar -xvz
 RUN mv graalvm-community-openjdk-${GRAAL_VERSION}* /usr/lib/graalvm
 RUN rm -rf $GRAAL_FOLDERNAME
 
 # Maven
-ENV MVN_VERSION 3.9.6
+ENV MVN_VERSION 3.9.9
 ENV MVN_FOLDERNAME apache-maven-${MVN_VERSION}
 ENV MVN_FILENAME apache-maven-${MVN_VERSION}-bin.tar.gz
 RUN curl -4 -L https://archive.apache.org/dist/maven/maven-3/${MVN_VERSION}/binaries/${MVN_FILENAME} | tar -xvz
@@ -23,15 +23,13 @@ RUN mv $MVN_FOLDERNAME /usr/lib/maven
 RUN rm -rf $MVN_FOLDERNAME
 
 # AWS Lambda Builders
-#RUN amazon-linux-extras enable python3.8
 RUN yum clean metadata && yum -y install python3-pip
 RUN pip3 install aws-lambda-builders
 
 VOLUME /project
 WORKDIR /project
 
-
-RUN /usr/lib/graalvm/bin/gu install native-image
+# native-image is now bundled with GraalVM since JDK 21+
 RUN ln -s /usr/lib/graalvm/bin/native-image /usr/bin/native-image
 RUN ln -s /usr/lib/maven/bin/mvn /usr/bin/mvn
 

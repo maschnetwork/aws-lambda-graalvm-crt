@@ -8,9 +8,9 @@
     <name>A sample Lambda function putting items to Amazon DynamoDB.</name>
 
     <properties>
-        <aws.sdk.version>2.23.3</aws.sdk.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <aws.sdk.version>2.30.31</aws.sdk.version>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
@@ -34,17 +34,17 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.36</version>
+            <version>2.0.17</version>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
-            <version>3.11.4</version>
+            <version>3.14.0</version>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-runtime-interface-client</artifactId>
-            <version>2.4.1</version>
+            <version>2.6.0</version>
         </dependency>
 
         <dependency>
@@ -75,7 +75,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
-                        <version>3.2.4</version>
+                        <version>3.6.0</version>
                         <executions>
                             <execution>
                                 <phase>package</phase>
@@ -96,7 +96,7 @@
                     <plugin>
                         <groupId>org.graalvm.buildtools</groupId>
                         <artifactId>native-maven-plugin</artifactId>
-                        <version>0.9.28</version>
+                        <version>0.10.4</version>
                         <extensions>true</extensions>
                         <executions>
                             <execution>
@@ -128,7 +128,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
-                        <version>3.2.4</version>
+                        <version>3.6.0</version>
                         <executions>
                             <execution>
                                 <phase>package</phase>
