@@ -18,6 +18,9 @@ Resources:
       Runtime: provided.al2023
       MemorySize: 1024
       Handler: com.maschnetwork.RequestHeaderWriter
+      Environment:
+        Variables:
+          LOG_LEVEL: INFO  # Set to DEBUG for more verbose logging
       Events:
         RequestHeaderEvent:
           Type: Api

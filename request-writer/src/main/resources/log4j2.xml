@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Lambda appender for CloudWatch Logs integration -->
+        <Lambda name="Lambda" format="${env:LOG_FORMAT:-TEXT}">
+            <!-- JSON Layout for structured logging when LOG_FORMAT=JSON -->
+            <JsonTemplateLayout eventTemplateUri="classpath:LambdaJsonLayout.json"/>
+        </Lambda>
+        <!-- Console appender for local development and testing -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{ISO8601} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+    
+    <Loggers>
+        <!-- Application logger -->
+        <Logger name="com.maschnetwork" level="${env:LOG_LEVEL:-INFO}" additivity="false">
+            <AppenderRef ref="Lambda"/>
+        </Logger>
+        
+        <!-- AWS SDK logging - set to WARN to reduce noise -->
+        <Logger name="software.amazon.awssdk" level="WARN" additivity="false">
+            <AppenderRef ref="Lambda"/>
+        </Logger>
+        
+        <!-- AWS CRT logging -->
+        <Logger name="software.amazon.awssdk.crt" level="WARN" additivity="false">
+            <AppenderRef ref="Lambda"/>
+        </Logger>
+        
+        <!-- Root logger -->
+        <Root level="${env:LOG_LEVEL:-INFO}">
+            <AppenderRef ref="Lambda"/>
+        </Root>
+    </Loggers>
+</Configuration>

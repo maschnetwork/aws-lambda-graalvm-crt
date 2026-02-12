@@ -17,6 +17,49 @@ Sample AWS Lambda application with GraalVM and AWS CRT client writing to Amazon 
 - AWS SAM CLI
 - Artillery for load testing
 
+## Logging
+
+This application uses Log4j2 with the AWS Lambda Log4j2 appender for optimized CloudWatch Logs integration. The logging configuration provides:
+
+- **Structured JSON logging** - Logs are output in JSON format for easy parsing in CloudWatch Logs Insights
+- **Request correlation** - AWS Request ID, function name, and API Gateway request ID are included in log context
+- **Configurable log levels** - Control verbosity via the `LOG_LEVEL` environment variable
+- **GraalVM native-image compatible** - Proper reflection configuration for Log4j2 in native builds
+
+### Log Levels
+
+Set the `LOG_LEVEL` environment variable to control logging verbosity:
+
+- `ERROR` - Only errors
+- `WARN` - Warnings and errors
+- `INFO` - Informational messages (default)
+- `DEBUG` - Detailed debug information for troubleshooting
+
+### CloudWatch Logs Insights Queries
+
+Query logs by request ID:
+```
+fields @timestamp, @message, context.awsRequestId
+| filter context.awsRequestId = "your-request-id"
+| sort @timestamp asc
+```
+
+Find errors:
+```
+fields @timestamp, level, message, exception
+| filter level = "ERROR"
+| sort @timestamp desc
+| limit 50
+```
+
+Analyze request durations (from application logs):
+```
+fields @timestamp, @message
+| filter message like /completed in/
+| parse message /completed in (?<duration>\d+) ms/
+| stats avg(duration), min(duration), max(duration), pct(duration, 95) by bin(5m)
+```
+
 ## Setup
 
 1. Create the bundling image:

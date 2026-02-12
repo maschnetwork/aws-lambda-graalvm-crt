@@ -1,0 +1,11 @@
+{
+  "resources": {
+    "includes": [
+      {"pattern": "log4j2\\.xml$"},
+      {"pattern": "Log4j-.*\\.xml$"},
+      {"pattern": "LambdaJsonLayout\\.json$"},
+      {"pattern": "org/apache/logging/log4j/core/config/plugins/Log4j2Plugins\\.dat$"},
+      {"pattern": "META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins\\.dat$"}
+    ]
+  }
+}
