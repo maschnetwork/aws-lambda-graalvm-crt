@@ -20,14 +20,7 @@ This Lambda function:
 
 ## Why AWS CRT Client?
 
-The default HTTP clients in the AWS SDK for Java v2 are [Netty NIO](https://netty.io/) (async) and [Apache HTTP Client](https://hc.apache.org/) (sync). This project replaces both with the **AWS Common Runtime (CRT) HTTP client**:
-
-| Feature | Default Clients (Netty / Apache) | AWS CRT Client |
-|---|---|---|
-| Implementation | Java-based | C-based (via JNI) |
-| GraalVM compatibility | Complex reflection config | Streamlined native support |
-| Cold start overhead | Higher | Lower |
-| Connection management | Standard | Optimized event-loop model |
+The default HTTP clients in the AWS SDK for Java v2 are [Netty NIO](https://netty.io/) (async) and [Apache HTTP Client](https://hc.apache.org/) (sync). This project replaces both with the **AWS Common Runtime (CRT) HTTP client**.
 
 The CRT client is purpose-built for AWS services and is better suited for GraalVM native image compilation, resulting in **smaller binaries**, **faster startup**, and **lower latency** in production.
 
