@@ -16,20 +16,38 @@ Thank you for your interest in contributing to this project! Here's how to get s
 
 ### Prerequisites
 
-- Java 17
-- GraalVM CE 17
-- AWS SAM CLI
-- Docker (for native image builds)
+- **Java 17**
+- **GraalVM Community Edition 17.0.9** (with `native-image` installed)
+- **Maven 3.9.6+**
+- **Docker** — required for building the native image in an Amazon Linux 2023 environment
+- **AWS SAM CLI** — for building, packaging, and deploying
+- **AWS CLI** — configured with valid credentials
 
 ### Build & Test
 
-```bash
-# Build the native image using Docker
-docker build -t lambda-graalvm .
+Build the Docker image that provides the GraalVM + Maven build environment:
 
-# Deploy locally with SAM
+```bash
+docker build -t al2023-graalvm:maven .
+```
+
+Build the native image using SAM:
+
+```bash
+sam build --build-image al2023-graalvm:maven --use-container
+```
+
+This runs `mvn clean install -P native` inside the container, compiling the Java source into a GraalVM native binary.
+
+### Deploy Locally
+
+```bash
 sam local start-api --template template.yaml
 ```
+
+## CI Pipeline
+
+Pull requests targeting `main` automatically trigger a Docker image build test via GitHub Actions. Ensure the Docker build passes before requesting a review.
 
 ## Reporting Issues
 
