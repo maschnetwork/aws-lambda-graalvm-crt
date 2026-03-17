@@ -1,0 +1,23 @@
+name: Docker Image Build Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    environment: build-test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build --no-cache --progress=plain -t aws-lambda-graalvm-crt:test .
+
+      - name: Verify image was created
+        run: docker image inspect aws-lambda-graalvm-crt:test
