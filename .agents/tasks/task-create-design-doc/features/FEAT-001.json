@@ -1,0 +1,26 @@
+{
+  "id": "FEAT-001",
+  "type": "docs",
+  "description": "Create docs/DESIGN.md with sections 1-5: System Architecture Overview, Request Flow, Component Design, Build Pipeline, and GraalVM Native Image Configuration. Include Mermaid diagrams for each section.",
+  "status": "in_progress",
+  "steps": [
+    "Create docs/DESIGN.md with a top-level title and table of contents linking to all 10 sections (sections 6-10 will be added in FEAT-002)",
+    "Section 1 - System Architecture Overview: High-level description with a Mermaid flowchart showing Client -> API Gateway (POST /request-headers-graal) -> Lambda (GraalVM Native, 1024MB, 20s, provided.al2023) -> DynamoDB (async CRT + sync CRT writes) -> DynamoDB table (request-headers). Annotate the CRT clients.",
+    "Section 2 - Request Flow: Mermaid sequence diagram showing: Client ->> API Gateway ->> Lambda RIC (bootstrap + native binary) ->> RequestHeaderWriter.handleRequest ->> extract headers ->> async PutItem via AwsCrtAsyncHttpClient (.get() blocks) ->> sync PutItem via AwsCrtHttpClient ->> return 200. Show error path returning 500.",
+    "Section 3 - Component Design: Document RequestHeaderWriter class. Two class-level DynamoDB clients (DynamoDbAsyncClient with AwsCrtAsyncHttpClient, DynamoDbClient with AwsCrtHttpClient). Both use EnvironmentVariableCredentialsProvider and region from AWS_REGION. handleRequest: header extraction, key=value concatenation, async write (id=requestId), sync write (id=sync-requestId). Include a Mermaid class diagram.",
+    "Section 4 - Build Pipeline: Mermaid flowchart of: Dockerfile (Amazon Linux 2023 + GraalVM CE 25.0.2 + Maven 3.9.14 + native toolchain) -> sam build uses Docker image -> Makefile runs 'mvn clean install -P native' -> Maven Shade Plugin 3.2.4 creates uber-JAR (mainClass: com.amazonaws.services.lambda.runtime.api.client.AWSLambda) -> native-maven-plugin 0.11.5 compiles to binary 'native' (--no-fallback) -> copies native + bootstrap to ARTIFACTS_DIR. Document JVM profile too.",
+    "Section 5 - GraalVM Native Image Configuration: Document all META-INF/native-image/ configs organized by library. (a) com.maschnetwork: --enable-url-protocols=http,https, reflect for RequestHeaderWriter. (b) com.amazonaws/crt/aws-crt: init-at-run-time for Log4JLogger, slf4j build_time, reflect for CRT/security classes, JNI config (474 lines for HTTP/MQTT/S3/auth/IO/event-stream), resource config for native libs. (c) aws-lambda-java-runtime-interface-client: init-at-build-time for SecuritySupport, reflect for AWSLambda/InvocationRequest, JNI and resource configs. (d) aws-lambda-java-events: reflect for API Gateway classes. (e) aws-lambda-java-core: reflect for LambdaRuntime/LogLevel. (f) aws-lambda-java-serialization: reflect for Jackson/Joda. Include a Mermaid diagram of the config hierarchy."
+  ],
+  "acceptance_criteria": [
+    "docs/DESIGN.md exists with sections 1-5 fully written",
+    "Contains at least 4 Mermaid diagrams (architecture, sequence, class, build pipeline)",
+    "All Mermaid code blocks use correct syntax",
+    "Technical details match source code exactly"
+  ],
+  "verification": [
+    "Read docs/DESIGN.md and confirm sections 1-5 exist with Mermaid diagrams",
+    "Verify key details: handler class com.maschnetwork.RequestHeaderWriter, SDK 2.23.3, GraalVM 25.0.2, Maven 3.9.14, native-maven-plugin 0.11.5"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}
