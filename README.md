@@ -1,11 +1,29 @@
 # AWS Lambda GraalVM Native Image with AWS CRT Client
 
-[![Java 17](https://img.shields.io/badge/Java-17-orange?logo=openjdk)](https://openjdk.org/projects/jdk/17/)
-[![GraalVM CE](https://img.shields.io/badge/GraalVM%20CE-17.0.9-blue?logo=oracle)](https://www.graalvm.org/)
+[![Java 25](https://img.shields.io/badge/Java-25-orange?logo=openjdk)](https://openjdk.org/projects/jdk/25/)
+[![GraalVM CE](https://img.shields.io/badge/GraalVM%20CE-25.0.2-blue?logo=oracle)](https://www.graalvm.org/)
 [![AWS SDK](https://img.shields.io/badge/AWS%20SDK-2.23.3-FF9900?logo=amazonaws)](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/home.html)
 [![Runtime](https://img.shields.io/badge/Runtime-provided.al2023-232F3E?logo=amazonwebservices)](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html)
+[![License](https://img.shields.io/badge/License-MIT%20No%20Attribution-green)](LICENSE)
 
 A high-performance AWS Lambda function compiled to a **GraalVM native image**, using the **AWS Common Runtime (CRT) HTTP client** for optimized DynamoDB operations. This project demonstrates how to achieve fast cold starts and low-latency execution by combining native ahead-of-time compilation with the AWS CRT -- a high-performance HTTP client written in C.
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Why AWS CRT Client?](#why-aws-crt-client)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Build and Deploy](#build-and-deploy)
+- [Testing](#testing)
+- [Load Testing](#load-testing)
+- [Tech Stack](#tech-stack)
+- [Cleanup](#cleanup)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
@@ -18,11 +36,24 @@ This Lambda function:
 - Writes the headers to an Amazon **DynamoDB** table (`request-headers`) using both sync and async CRT clients
 - Runs as a **GraalVM native binary** on the `provided.al2023` custom runtime for minimal cold start latency
 
+---
+
 ## Why AWS CRT Client?
 
-The default HTTP clients in the AWS SDK for Java v2 are [Netty NIO](https://netty.io/) (async) and [Apache HTTP Client](https://hc.apache.org/) (sync). This project replaces both with the **AWS Common Runtime (CRT) HTTP client**.
+The default HTTP clients in the AWS SDK for Java v2 are [Netty NIO](https://netty.io/) (async) and [Apache HTTP Client](https://hc.apache.org/) (sync). This project explicitly **excludes both** and replaces them with the **AWS Common Runtime (CRT) HTTP client**.
 
-The CRT client is purpose-built for AWS services and is better suited for GraalVM native image compilation, resulting in **smaller binaries**, **faster startup**, and **lower latency** in production.
+The CRT client is purpose-built for AWS services and offers several advantages for GraalVM native image compilation:
+
+| | Default Clients | AWS CRT Client |
+|---|---|---|
+| **Binary size** | Larger (Netty + Apache) | Smaller |
+| **Cold start** | Slower | Faster |
+| **GraalVM compat** | Requires extensive config | Better native image support |
+| **Implementation** | Java-based | C-based (via JNI) |
+
+The result is **smaller binaries**, **faster startup**, and **lower latency** in production.
+
+---
 
 ## Architecture
 
@@ -58,14 +89,20 @@ The CRT client is purpose-built for AWS services and is better suited for GraalV
                                 +------------------+
 ```
 
+Both the async write (id: `<request-id>`) and the sync write (id: `sync-<request-id>`) are persisted to the same DynamoDB table in a single invocation.
+
+---
+
 ## Project Structure
 
 ```
 aws-lambda-graalvm-crt/
-|-- Dockerfile                          # Build image: Amazon Linux 2023 + GraalVM CE 17.0.9 + Maven 3.9.6
+|-- Dockerfile                          # Build image: Amazon Linux 2023 + GraalVM CE 25.0.2 + Maven 3.9.14
 |-- template.yaml                       # SAM template (Lambda, API Gateway, DynamoDB)
 |-- loadtest.yml                        # Artillery load test config (30s, 150 req/s)
 |-- result.png                          # Load test results screenshot
+|-- CONTRIBUTING.md                     # Contribution guidelines
+|-- LICENSE                             # MIT No Attribution
 |-- README.md
 |
 `-- request-writer/                     # Lambda function source
@@ -86,21 +123,27 @@ aws-lambda-graalvm-crt/
                     `-- aws-lambda-java-serialization/
 ```
 
+---
+
 ## Prerequisites
 
 Before you begin, make sure you have the following installed:
 
-- **Docker** -- required to build the GraalVM native image in an Amazon Linux 2023 environment
-- **AWS SAM CLI** -- for building, packaging, and deploying the Lambda function
-- **AWS CLI** -- configured with valid credentials and a default region
-- **An AWS Account** -- with permissions to create Lambda functions, API Gateway, DynamoDB tables, and IAM roles
-- **Artillery** *(optional)* -- for running load tests
+| Tool | Purpose |
+|---|---|
+| **[Docker](https://www.docker.com/)** | Build the GraalVM native image in an Amazon Linux 2023 environment |
+| **[AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)** | Build, package, and deploy the Lambda function |
+| **[AWS CLI](https://aws.amazon.com/cli/)** | Configured with valid credentials and a default region |
+| **AWS Account** | With permissions to create Lambda, API Gateway, DynamoDB, and IAM resources |
+| **[Artillery](https://www.artillery.io/)** *(optional)* | Run load tests against the deployed API |
+
+---
 
 ## Build and Deploy
 
 ### 1. Build the Docker Image
 
-The Dockerfile creates a build environment with GraalVM Community Edition 17.0.9, Maven 3.9.6, and the native-image tool on Amazon Linux 2023:
+The Dockerfile creates a build environment with GraalVM Community Edition 25.0.2, Maven 3.9.14, and the `native-image` tool on Amazon Linux 2023:
 
 ```bash
 docker build -t al2023-graalvm:maven .
@@ -115,7 +158,8 @@ sam build --build-image al2023-graalvm:maven --use-container
 ```
 
 This runs `mvn clean install -P native` inside the container, which:
-1. Compiles the Java 17 source code
+
+1. Compiles the Java 25 source code
 2. Creates an uber-JAR via the Maven Shade plugin
 3. Compiles the uber-JAR into a native binary using `native-maven-plugin`
 4. Copies the native binary and bootstrap script to the SAM artifacts directory
@@ -135,9 +179,14 @@ sam deploy
 ```
 
 This creates the following AWS resources:
-- **Lambda function** (`dynamodb-request-writer-graal`) with 1024 MB memory and 20s timeout
-- **API Gateway** REST API with a `POST /request-headers-graal` endpoint
-- **DynamoDB table** (`request-headers`) with on-demand capacity
+
+| Resource | Details |
+|---|---|
+| **Lambda function** | `dynamodb-request-writer-graal` -- 1024 MB memory, 20s timeout |
+| **API Gateway** | REST API with a `POST /request-headers-graal` endpoint |
+| **DynamoDB table** | `request-headers` with on-demand capacity |
+
+---
 
 ## Testing
 
@@ -166,11 +215,13 @@ successful
 
 Both an async CRT write (id: `<request-id>`) and a sync CRT write (id: `sync-<request-id>`) are persisted to the DynamoDB table.
 
+---
+
 ## Load Testing
 
 ### Run the Load Test
 
-The included Artillery configuration sends **150 requests per second** for **30 seconds** (4,500 total requests):
+The included [Artillery](https://www.artillery.io/) configuration sends **150 requests per second** for **30 seconds** (4,500 total requests):
 
 ```bash
 artillery run -t $API_GW_URL -v '{ "url": "/request-headers-graal" }' loadtest.yml
@@ -208,20 +259,24 @@ filter @type = "REPORT"
 | `0` | Warm start -- execution duration only |
 | `1` | Cold start -- init duration + execution duration |
 
+---
+
 ## Tech Stack
 
 | Component | Version / Details |
 |---|---|
-| Java | 17 |
-| GraalVM Community Edition | 17.0.9 |
+| Java | 25 |
+| GraalVM Community Edition | 25.0.2 |
 | AWS SDK for Java v2 | 2.23.3 |
 | AWS CRT HTTP Client | `AwsCrtHttpClient` (sync) + `AwsCrtAsyncHttpClient` (async) |
-| Native Image Plugin | `native-maven-plugin` 0.9.28 |
+| Native Image Plugin | `native-maven-plugin` 0.11.5 |
 | Maven Shade Plugin | 3.2.4 |
 | Lambda Runtime | `provided.al2023` (Amazon Linux 2023) |
 | Build Base Image | `public.ecr.aws/amazonlinux/amazonlinux:2023` |
-| Maven | 3.9.6 |
+| Maven | 3.9.14 |
 | Infrastructure as Code | AWS SAM |
+
+---
 
 ## Cleanup
 
@@ -231,6 +286,12 @@ To remove all deployed AWS resources:
 sam delete --stack-name <YOUR-STACK-NAME>
 ```
 
+---
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to get started.
+
 ## License
 
-This project is provided as a sample/demo. See the repository for license details.
+This project is licensed under the [MIT No Attribution License](LICENSE).
